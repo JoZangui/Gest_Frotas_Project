@@ -1,11 +1,77 @@
+{% load static %}
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Gest form - Home</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover, user-scalable=yes">
+    <meta name="description" content="Sistema de rastreamento de frota com geolocalização em tempo real">
+    <meta name="theme-color" content="#2563eb">
+    <meta name="color-scheme" content="light">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Frotas">
+    <meta name="msapplication-TileColor" content="#2563eb">
+    <meta name="msapplication-config" content="{% static 'browserconfig.xml' %}">
+    
+    <title>Gestão de Frotas - Rastreamento em Tempo Real</title>
+    
+    <!-- Leaflet map css -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css" />
+    
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="{% static 'js/manifest.json' %}">
+    
+    <!-- Icons -->
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'icons/icon-192.png' %}">
+    <link rel="apple-touch-icon" href="{% static 'icons/icon-192.png' %}">
 </head>
 <body>
     
+    {% block main_content %}
+    {% endblock main_content %}
+
+    <!-- 
+        ------------- scripts --------------- 
+    -->
+
+    <!-- Leaflet map script -->
+    <script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+    
+    <!-- Geolocation Tracking Script -->
+    <script src="{% static 'js/geolocation.js' %}"></script>
+    
+    <!-- Service Worker Registration and PWA Support -->
+    <script>
+        // Registrar Service Worker para PWA
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register("{% static 'js/service-worker.js' %}").then(
+                    registration => {
+                        console.log('[PWA] Service Worker registrado com sucesso:', registration);
+                    },
+                    error => {
+                        console.error('[PWA] Falha ao registrar Service Worker:', error);
+                    }
+                );
+            });
+        }
+
+        // Detectar instalação da PWA
+        window.addEventListener('beforeinstallprompt', e => {
+            e.preventDefault();
+            console.log('[PWA] App pode ser instalado');
+            // Guardar o evento para mostrar um botão de instalação customizado se necessário
+            window.installPrompt = e;
+        });
+
+        window.addEventListener('appinstalled', () => {
+            console.log('[PWA] App foi instalada');
+            // Limpar o event
+            window.installPrompt = null;
+        });
+    </script>
+    {% block scripts %}
+    {% endblock scripts %}
 </body>
 </html>

@@ -1,3 +1,4 @@
 from django.contrib import admin
+from gest_frotas_app.models import LocalizacaoDoVeiculo
 
-# Register your models here.
+admin.site.register(LocalizacaoDoVeiculo)

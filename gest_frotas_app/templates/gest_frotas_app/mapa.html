@@ -1,0 +1,69 @@
+{% extends "gest_frotas_app/base.html" %}
+{% block main_content %}
+    <h2>Mapa de Veículos</h2>
+    <div id="map" style="height:500px;"></div>
+    <p id="map-center"></p>
+    <p id="map-zoom"></p>
+{% endblock main_content %}
+{% block scripts %}
+    <!--
+        Mapa interativo usando Leaflet.js
+         - Exibe a localização dos veículos em tempo real
+         - Atualiza o centro e zoom do mapa conforme o usuário interage
+         - Integração com OSRM para cálculo de rotas (exemplo básico no final)
+    -->
+    <script>
+        // Marginal de Luanda (Avenida 4 de Fevereiro)
+        var map = L.map('map').setView([-8.8107, 13.2333], 15);
+
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
+            subdomains: 'abcd',
+            maxZoom: 20
+        }).addTo(map);
+
+        function atualizarInfoMapa() {
+            var centro = map.getCenter();
+            var zoom = map.getZoom();
+            document.getElementById('map-center').textContent =
+                'Lat: ' + centro.lat.toFixed(6) + ', Lng: ' + centro.lng.toFixed(6);
+            document.getElementById('map-zoom').textContent = zoom;
+        }
+
+        map.on('zoomend', atualizarInfoMapa);
+        map.on('moveend', atualizarInfoMapa);
+        atualizarInfoMapa();
+
+        // Atualizar veículos em tempo real
+        function atualizarVeiculos() {
+            fetch("/api/listar/")
+                .then(res => res.json())
+                .then(data => {
+                    data.forEach(v => {
+                        L.marker([v.lat, v.lng])
+                          .addTo(map)
+                          .bindPopup(`Veículo: ${v.vehicle_id}<br>${v.timestamp}`);
+                    });
+                });
+        }
+        setInterval(atualizarVeiculos, 10000); // atualiza a cada 10s
+    </script>
+    <!-- 
+        Integração com OSRM
+        Para calcular rotas entre dois pontos:
+        calcularRota("13.2333,-8.8107", "13.2500,-8.8000");
+    -->
+    <script>
+        function calcularRota(origem, destino) {
+            fetch(`http://127.0.0.1:5000/route/v1/driving/${origem};${destino}?overview=full&geometries=geojson`)
+            .then(res => res.json())
+            .then(data => {
+                var coords = data.routes[0].geometry.coordinates;
+                var latlngs = coords.map(c => [c[1], c[0]]);
+                L.polyline(latlngs, {color: 'blue'}).addTo(map);
+                map.fitBounds(L.polyline(latlngs).getBounds());
+            });
+        }
+
+    </script>
+{% endblock scripts %}

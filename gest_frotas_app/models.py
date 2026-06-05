@@ -25,6 +25,22 @@ class Veiculo(models.Model):
     def __str__(self):
         return f"{self.marca} {self.modelo} ({self.placa})"
 
+class LocalizacaoDoVeiculo(models.Model):
+    """
+        Modelo de Localização do Veículo para o sistema de gestão de frotas.
+        - veiculo: Veículo associado à localização.
+        - latitude: Latitude da localização do veículo.
+        - longitude: Longitude da localização do veículo.
+        - timestamp: Data e hora da última atualização da localização.
+    """
+    veiculo = models.ForeignKey(Veiculo, on_delete=models.CASCADE)
+    latitude = models.FloatField()
+    longitude = models.FloatField()
+    timestamp = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.veiculo.placa} @ {self.timestamp}"
+
 class Manutencao(models.Model):
     """
         Modelo de Manutenção para o sistema de gestão de frotas.
@@ -96,4 +112,22 @@ class Metricas(models.Model):
 
     def __str__(self):
         return f"Métricas do {self.veiculo} em {self.data}"
+
+class Empresa(models.Model):
+    """
+        Modelo de Empresa para manutenção dos veículos.
+        - nome: Nome da empresa.
+        - cnpj: CNPJ da empresa (único).
+        - endereco: Endereço da empresa.
+        - telefone: Número de telefone da empresa.
+    """
+    veiculo = models.ForeignKey(Veiculo, on_delete=models.CASCADE)
+    nome = models.CharField(max_length=100)
+    cnpj = models.CharField(max_length=20, unique=True)
+    email = models.EmailField()
+    endereco = models.CharField(max_length=200)
+    telefone = models.CharField(max_length=20)
+
+    def __str__(self):
+        return self.nome
 

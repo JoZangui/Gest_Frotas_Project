@@ -1,5 +1,39 @@
-{% extends "gest_frotas_app/base.html" %}
-
+﻿{% extends "gest_frotas_app/base.html" %}
 {% block main_content %}
-    
+    <div id="map" style="height:500px;"></div>
+    <div id="map-info" style="margin-top: 10px; font-family: Arial, sans-serif; font-size: 14px; color: #333;">
+        <strong>Centro do mapa:</strong>
+        <span id="map-center">Lat: -8.8107, Lng: 13.2333</span>
+        <br>
+        <strong>Zoom:</strong>
+        <span id="map-zoom">15</span>
+    </div>
 {% endblock main_content %}
+{% block scripts %}
+    <script>
+        // Marginal de Luanda (Avenida 4 de Fevereiro)
+        var map = L.map('map').setView([-8.8107, 13.2333], 15);
+
+        // Adiciona tiles do OpenStreetMap
+        L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png', {
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OSM</a> &copy; <a href="https://carto.com/">CARTO</a>',
+            subdomains: 'abcd',
+            maxZoom: 20
+        }).addTo(map);
+
+        function atualizarInfoMapa() {
+            var centro = map.getCenter();
+            var zoom = map.getZoom();
+
+            document.getElementById('map-center').textContent =
+                'Lat: ' + centro.lat.toFixed(6) + ', Lng: ' + centro.lng.toFixed(6);
+            document.getElementById('map-zoom').textContent = zoom;
+        }
+
+        map.on('zoomend', atualizarInfoMapa);
+        map.on('moveend', atualizarInfoMapa);
+
+        // Inicializa com os valores atuais
+        atualizarInfoMapa();
+    </script>
+{% endblock scripts %}
